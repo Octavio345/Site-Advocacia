@@ -1,12 +1,16 @@
-// Utilitário para carregar conteúdo do CMS
+﻿// Utilitário para carregar conteúdo do CMS
 export async function loadContent(filePath) {
   try {
     const response = await fetch(filePath);
+    if (!response.ok) {
+      console.error('Erro ao carregar:', filePath);
+      return { data: {} };
+    }
     const text = await response.text();
     return parseFrontmatter(text);
   } catch (error) {
     console.error('Erro ao carregar conteúdo:', error);
-    return null;
+    return { data: {} };
   }
 }
 
