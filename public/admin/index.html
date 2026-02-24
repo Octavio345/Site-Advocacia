@@ -5,23 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerenciar Site - Dr. Carlos Silva</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, #0a2472 0%, #1e3a8a 100%);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
-      padding: 20px;
     }
-    
     .container {
       background: white;
       padding: 48px;
@@ -29,21 +21,9 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.2);
       text-align: center;
       max-width: 400px;
-      width: 100%;
     }
-    
-    h1 {
-      color: #0a2472;
-      font-size: 28px;
-      margin-bottom: 10px;
-    }
-    
-    p {
-      color: #666;
-      margin-bottom: 30px;
-      line-height: 1.6;
-    }
-    
+    h1 { color: #0a2472; margin-bottom: 10px; }
+    p { color: #666; margin-bottom: 30px; }
     .loader {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #ffd700;
@@ -52,31 +32,21 @@
       height: 40px;
       animation: spin 1s linear infinite;
       margin: 20px auto;
-      display: none;
     }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .hidden {
-      display: none;
-    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="container" id="loginContainer">
+  <div class="container" id="container">
     <h1>⚖️ Dr. Carlos Silva</h1>
-    <p>Faça login para gerenciar os artigos do blog</p>
-    
+    <p id="message">Verificando autenticação...</p>
     <div id="loader" class="loader"></div>
-    <div id="message" style="margin-top: 20px; color: #666;"></div>
   </div>
 
   <script>
-    // ===== CONFIGURAÇÃO DO CMS =====
-    window.CMS_CONFIG = {
+    // CONFIGURAÇÃO DO CMS
+    const CMS_CONFIG = {
       backend: {
         name: "github",
         repo: "Octavio345/Site-Advocacia",
@@ -106,46 +76,44 @@
       ]
     };
 
-    // ===== LÓGICA DE AUTENTICAÇÃO =====
-    function showMessage(text) {
-      document.getElementById('message').innerText = text;
-    }
-
-    function showLoader(show) {
-      document.getElementById('loader').style.display = show ? 'block' : 'none';
-    }
-
-    // Verificar se tem token na URL
-    const hash = window.location.hash;
-    if (hash && hash.includes('access_token=')) {
-      const token = hash.split('access_token=')[1].split('&')[0];
-      
-      showMessage('✅ Token obtido! Carregando CMS...');
-      showLoader(true);
-      
+    // FUNÇÃO PARA INICIAR CMS COM TOKEN
+    function startCMSWithToken(token) {
       // Salvar token
       localStorage.setItem('github_token', token);
       
-      // Limpar URL
-      window.location.hash = '';
+      // Forçar CMS a usar o token
+      window.CMS = window.CMS || {};
+      window.CMS.getToken = function() { return token; };
       
-      // Iniciar CMS com token
-      initCMSWithToken(token);
-    } 
-    // Verificar se já tem token salvo
-    else if (localStorage.getItem('github_token')) {
-      showMessage('🔑 Sessão ativa. Carregando CMS...');
-      showLoader(true);
-      initCMSWithToken(localStorage.getItem('github_token'));
-    }
-    else {
-      // Mostrar botão de login manual
-      showLoginButton();
+      // Iniciar CMS manualmente
+      window.CMS_MANUAL_INIT = true;
+      
+      // Carregar script do CMS
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
+      script.onload = function() {
+        window.CMS.init({ config: CMS_CONFIG });
+        document.getElementById('container').innerHTML = '<p>✅ CMS carregado! Redirecionando...</p>';
+      };
+      document.body.appendChild(script);
     }
 
-    function showLoginButton() {
-      const container = document.getElementById('loginContainer');
-      container.innerHTML = `
+    // VERIFICAR TOKEN NA URL
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      const token = hash.split('access_token=')[1].split('&')[0];
+      document.getElementById('message').innerText = '✅ Token obtido! Iniciando CMS...';
+      startCMSWithToken(token);
+    } 
+    // VERIFICAR TOKEN SALVO
+    else if (localStorage.getItem('github_token')) {
+      const token = localStorage.getItem('github_token');
+      document.getElementById('message').innerText = '🔑 Sessão ativa! Iniciando CMS...';
+      startCMSWithToken(token);
+    }
+    else {
+      // MOSTRAR BOTÃO DE LOGIN
+      document.getElementById('container').innerHTML = `
         <h1>⚖️ Dr. Carlos Silva</h1>
         <p>Faça login para gerenciar os artigos do blog</p>
         <button id="loginBtn" style="
@@ -157,50 +125,17 @@
           font-size: 16px;
           font-weight: 600;
           cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          transition: all 0.3s;
           width: 100%;
-          justify-content: center;
         ">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.682-.103-.253-.447-1.27.098-2.646 0 0 .84-.269 2.75 1.025.8-.223 1.65-.334 2.5-.334.85 0 1.7.111 2.5.334 1.91-1.294 2.75-1.025 2.75-1.025.545 1.376.201 2.393.099 2.646.64.698 1.03 1.591 1.03 2.682 0 3.841-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
-          </svg>
           Login com GitHub
         </button>
-        <div id="loader" class="loader"></div>
-        <div id="message" style="margin-top: 20px; color: #666;"></div>
+        <div id="loader" class="loader hidden"></div>
       `;
       
-      document.getElementById('loginBtn').addEventListener('click', function() {
-        showLoader(true);
-        document.getElementById('message').innerText = 'Redirecionando para GitHub...';
+      document.getElementById('loginBtn').addEventListener('click', () => {
+        document.getElementById('loader').classList.remove('hidden');
         window.location.href = '/api/auth';
       });
-    }
-
-    function initCMSWithToken(token) {
-      // Configurar CMS para usar o token
-      window.CMS = window.CMS || {};
-      window.CMS.getToken = function() { return token; };
-      
-      // Inicializar CMS com a configuração
-      window.CMS_MANUAL_INIT = true;
-      
-      // Carregar script do CMS
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
-      script.onload = function() {
-        window.CMS.init({ config: window.CMS_CONFIG });
-      };
-      document.body.appendChild(script);
-    }
-
-    // Verificar se tem erro na URL
-    if (hash && hash.includes('error=')) {
-      const error = hash.split('error=')[1];
-      showMessage(`❌ Erro: ${error}`);
     }
   </script>
 </body>
