@@ -3,34 +3,26 @@ const path = require('path');
 
 exports.handler = async function(event, context) {
   try {
-    // No Netlify, o caminho correto é /opt/build/repo/src/content/posts
-    const possiblePaths = [
-      path.join(process.cwd(), 'src/content/posts'),
-      path.join('/opt/build/repo', 'src/content/posts'),
-      path.join(__dirname, '../../src/content/posts')
-    ];
+    // Caminho absoluto baseado na localização da função
+    // A função está em: /opt/build/repo/netlify/functions/list-posts.js
+    // Os posts estão em: /opt/build/repo/src/content/posts
     
-    let postsDirectory = null;
-    let files = [];
+    const baseDir = path.resolve(__dirname, '../../');
+    const postsDirectory = path.join(baseDir, 'src/content/posts');
     
-    for (const testPath of possiblePaths) {
-      try {
-        if (fs.existsSync(testPath)) {
-          postsDirectory = testPath;
-          files = fs.readdirSync(postsDirectory);
-          break;
-        }
-      } catch (e) {
-        console.log('Caminho não encontrado:', testPath);
-      }
-    }
+    console.log('Tentando acessar:', postsDirectory);
     
-    if (!postsDirectory) {
+    if (!fs.existsSync(postsDirectory)) {
       return {
         statusCode: 404,
-        body: JSON.stringify({ error: 'Pasta de posts não encontrada' })
+        body: JSON.stringify({ 
+          error: 'Pasta não encontrada',
+          path: postsDirectory 
+        })
       };
     }
+    
+    const files = fs.readdirSync(postsDirectory);
     
     const posts = files
       .filter(file => file.endsWith('.md'))
@@ -44,10 +36,12 @@ exports.handler = async function(event, context) {
       body: JSON.stringify({ posts })
     };
   } catch (error) {
-    console.log('Erro detalhado:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ 
+        error: error.message,
+        stack: error.stack 
+      })
     };
   }
 };
