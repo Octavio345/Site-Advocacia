@@ -6,53 +6,6 @@
   <title>Gerenciar Site</title>
 </head>
 <body>
-  <!-- Inclui o CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  
-  <script>
-    // Configuração manual
-    window.CMS_MANUAL_INIT = true;
-    
-    // Pega o token da URL se existir
-    const hash = window.location.hash;
-    let token = null;
-    if (hash && hash.includes('access_token=')) {
-      token = hash.split('access_token=')[1].split('&')[0];
-      // Limpa a URL
-      window.location.hash = '';
-    }
-    
-    window.CMS.init({
-      config: {
-        backend: {
-          name: "github",
-          repo: "Octavio345/Site-Advocacia",
-          branch: "main",
-          base_url: "https://site-advocacia-one.vercel.app/",
-          auth_endpoint: "api/auth"
-        },
-        media_folder: "public/images/uploads",
-        public_folder: "/images/uploads",
-        collections: [
-          {
-            name: "posts",
-            label: "Artigos",
-            folder: "src/content/posts",
-            create: true,
-            slug: "{{year}}-{{month}}-{{day}}-{{slug}}",
-            fields: [
-              { label: "Título", name: "title", widget: "string" },
-              { label: "Data", name: "date", widget: "datetime" },
-              { label: "Categoria", name: "category", widget: "string", required: false },
-              { label: "Descrição", name: "description", widget: "text", required: false },
-              { label: "Imagem de destaque", name: "image", widget: "image", required: false },
-              { label: "Autor", name: "author", widget: "string", default: "Dr. Carlos Silva" },
-              { label: "Conteúdo", name: "body", widget: "markdown" }
-            ]
-          }
-        ]
-      }
-    });
-  </script>
 </body>
 </html>
