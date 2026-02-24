@@ -3,11 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerenciar Site</title>
+  <title>Gerenciar Site - Dr. Carlos Silva</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background-color: #f5f5f5;
+      background: linear-gradient(135deg, #0a2472 0%, #1e3a8a 100%);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -15,56 +21,83 @@
       margin: 0;
       padding: 20px;
     }
-    .login-container {
+    
+    .container {
       background: white;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 48px;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
       text-align: center;
       max-width: 400px;
       width: 100%;
     }
+    
     h1 {
       color: #0a2472;
+      font-size: 28px;
       margin-bottom: 10px;
     }
+    
     p {
       color: #666;
       margin-bottom: 30px;
+      line-height: 1.6;
     }
+    
     .github-btn {
       background-color: #24292e;
       color: white;
       border: none;
-      padding: 12px 24px;
-      border-radius: 6px;
+      padding: 14px 28px;
+      border-radius: 50px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      transition: background-color 0.3s;
+      gap: 10px;
+      transition: all 0.3s;
+      width: 100%;
+      justify-content: center;
     }
+    
     .github-btn:hover {
       background-color: #2c974b;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
+    
     .github-btn svg {
       width: 20px;
       height: 20px;
       fill: white;
     }
-    .loading {
+    
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #ffd700;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
       display: none;
-      margin-top: 20px;
-      color: #666;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
+  <div class="container">
     <h1>⚖️ Dr. Carlos Silva</h1>
-    <p>Faça login para gerenciar o conteúdo do site</p>
+    <p>Faça login para gerenciar os artigos do blog</p>
     
     <button id="loginBtn" class="github-btn">
       <svg viewBox="0 0 24 24">
@@ -73,46 +106,86 @@
       Login com GitHub
     </button>
     
-    <div id="loading" class="loading">
-      <p>Redirecionando para GitHub...</p>
-    </div>
+    <div id="loader" class="loader"></div>
+    <div id="message" style="margin-top: 20px; color: #666;"></div>
   </div>
 
   <script>
-    // Verificar se já está logado
-    if (localStorage.getItem('github_token')) {
-      // Se tiver token, carrega o CMS
+    // Função para mostrar mensagem
+    function showMessage(text) {
+      document.getElementById('message').innerText = text;
+    }
+
+    // Função para mostrar loader
+    function showLoader(show) {
+      document.getElementById('loader').style.display = show ? 'block' : 'none';
+      document.getElementById('loginBtn').disabled = show;
+    }
+
+    // VERIFICAR SE TEM TOKEN NA URL
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      // Extrair token
+      const token = hash.split('access_token=')[1].split('&')[0];
+      
+      showMessage('✅ Token obtido! Carregando CMS...');
+      showLoader(true);
+      
+      // Salvar token no localStorage
+      localStorage.setItem('github_token', token);
+      
+      // Limpar a URL
+      window.location.hash = '';
+      
+      // Carregar o CMS
+      loadCMS();
+    } 
+    // Verificar se já tem token salvo
+    else if (localStorage.getItem('github_token')) {
+      showMessage('🔑 Sessão ativa. Carregando CMS...');
+      showLoader(true);
       loadCMS();
     }
 
     // Botão de login
     document.getElementById('loginBtn').addEventListener('click', function() {
-      document.getElementById('loading').style.display = 'block';
-      this.disabled = true;
+      showLoader(true);
+      showMessage('Redirecionando para GitHub...');
       
-      // Redirecionar para o GitHub
-      const clientId = 'SEU_CLIENT_ID_AQUI'; // ← COLOQUE SEU CLIENT ID
-      const redirectUri = 'https://site-advocacia-one.vercel.app/api/auth';
-      const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=repo,user`;
-      
-      window.location.href = authUrl;
+      // Redirecionar para a API de autenticação
+      window.location.href = '/api/auth';
     });
 
     // Função para carregar o CMS
     function loadCMS() {
-      document.body.innerHTML = '<div id="cms"></div>';
+      // Esconder container de login
+      document.querySelector('.container').classList.add('hidden');
+      
+      // Mostrar loading
+      document.body.innerHTML = `
+        <div style="background: white; padding: 40px; border-radius: 16px; text-align: center;">
+          <div class="loader" style="display: block;"></div>
+          <p style="margin-top: 20px; color: #0a2472;">Carregando CMS...</p>
+        </div>
+      `;
+      
+      // Adicionar o script do CMS
       const script = document.createElement('script');
       script.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
+      script.onload = function() {
+        console.log('CMS carregado com sucesso!');
+      };
+      script.onerror = function() {
+        showMessage('❌ Erro ao carregar CMS. Tente novamente.');
+        showLoader(false);
+      };
       document.body.appendChild(script);
     }
 
-    // Verificar se tem token na URL (vindo do callback)
-    const hash = window.location.hash;
-    if (hash && hash.includes('access_token=')) {
-      const token = hash.split('access_token=')[1].split('&')[0];
-      localStorage.setItem('github_token', token);
-      window.location.hash = '';
-      loadCMS();
+    // Verificar se tem erro na URL
+    if (hash && hash.includes('error=')) {
+      const error = hash.split('error=')[1];
+      showMessage(`❌ Erro: ${error}`);
     }
   </script>
 </body>
