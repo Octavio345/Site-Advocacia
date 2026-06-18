@@ -1,12 +1,97 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerenciar Site</title>
+  <title>Gerenciar Site - Edson Maltez</title>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@3.10.1/dist/decap-cms.js"></script>
+
+  <script>
+    function extractYouTubeId(url) {
+      if (!url) return null;
+
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+
+      return match && match[2].length === 11 ? match[2] : null;
+    }
+
+    const PostPreview = CMS.createClass({
+      render: function () {
+        const entry = this.props.entry;
+        const title = entry.getIn(['data', 'title']) || 'Sem titulo';
+        const date = entry.getIn(['data', 'date']) || new Date().toISOString();
+        const category = entry.getIn(['data', 'category']);
+        const description = entry.getIn(['data', 'description']);
+        const image = entry.getIn(['data', 'image']);
+        const featuredVideo = entry.getIn(['data', 'featured_video']);
+        const author = entry.getIn(['data', 'author']) || 'Edson Silva Maltez';
+        const body = entry.getIn(['data', 'body']) || '';
+        const h = this.React ? this.React.createElement : React.createElement;
+
+        let videoElement = null;
+
+        if (featuredVideo) {
+          const videoData = featuredVideo.toJSON ? featuredVideo.toJSON() : featuredVideo;
+
+          if (videoData.type === 'youtube' && videoData.url) {
+            const videoId = extractYouTubeId(videoData.url);
+
+            if (videoId) {
+              videoElement = h('div', { style: { margin: '20px 0', padding: '15px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e9ecef' } },
+                h('iframe', {
+                  src: `https://www.youtube.com/embed/${videoId}`,
+                  allowFullScreen: true,
+                  style: { width: '100%', height: '315px', border: 'none', borderRadius: '8px' },
+                }),
+                videoData.caption ? h('div', { style: { textAlign: 'center', marginTop: '10px', color: '#666', fontStyle: 'italic' } }, videoData.caption) : null
+              );
+            }
+          } else if (videoData.type === 'upload' && videoData.file) {
+            videoElement = h('div', { style: { margin: '20px 0', padding: '15px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e9ecef' } },
+              h('video', { controls: true, style: { width: '100%', maxHeight: '400px', borderRadius: '8px' } },
+                h('source', { src: videoData.file, type: 'video/mp4' })
+              ),
+              videoData.caption ? h('div', { style: { textAlign: 'center', marginTop: '10px', color: '#666', fontStyle: 'italic' } }, videoData.caption) : null
+            );
+          }
+        }
+
+        const imageElement = !featuredVideo && image
+          ? h('img', { src: image, style: { width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '8px', marginBottom: '30px' } })
+          : null;
+
+        const contentHtml = window.marked ? window.marked.parse(body) : body;
+        const formattedDate = new Date(date).toLocaleDateString('pt-BR');
+
+        return h('div', { style: { fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto', padding: '20px', background: 'white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' } },
+          h('div', { style: { background: 'linear-gradient(135deg, #0a2472 0%, #1e3a8a 100%)', color: 'white', padding: '40px', textAlign: 'center', marginBottom: '30px', borderRadius: '8px' } },
+            category ? h('span', { style: { background: '#c9a227', color: '#0a2472', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block', marginBottom: '15px' } }, category) : null,
+            h('h1', { style: { fontSize: '36px', margin: '10px 0' } }, title),
+            description ? h('p', { style: { fontSize: '18px', opacity: 0.9, maxWidth: '600px', margin: '15px auto' } }, description) : null,
+            h('div', { style: { display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px', fontSize: '14px', opacity: 0.8 } },
+              h('span', null, `Data: ${formattedDate}`),
+              h('span', null, `Autor: ${author}`)
+            )
+          ),
+          videoElement,
+          imageElement,
+          h('div', {
+            style: { fontSize: '16px', lineHeight: '1.8', color: '#333' },
+            dangerouslySetInnerHTML: { __html: contentHtml },
+          }),
+          h('div', { style: { marginTop: '50px', paddingTop: '20px', borderTop: '2px solid #c9a227', textAlign: 'center', fontSize: '14px', color: '#666' } },
+            `Publicado por ${author} - OAB/SP 344.956`
+          )
+        );
+      },
+    });
+
+    CMS.registerPreviewTemplate('posts', PostPreview);
+  </script>
 </body>
 </html>

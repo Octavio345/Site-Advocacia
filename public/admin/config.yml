@@ -1,4 +1,4 @@
-﻿backend:
+backend:
   name: git-gateway
   branch: main
 
@@ -8,14 +8,49 @@ public_folder: "/images/uploads"
 collections:
   - name: "posts"
     label: "Artigos"
-    folder: "src/content/posts"
+    folder: "public/content/posts"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - {label: "Título", name: "title", widget: "string"}
       - {label: "Data", name: "date", widget: "datetime"}
       - {label: "Categoria", name: "category", widget: "string", required: false}
-      - {label: "Descrição", name: "description", widget: "text", required: false}
-      - {label: "Imagem de destaque", name: "image", widget: "image", required: false}
-      - {label: "Autor", name: "author", widget: "string", default: "Dr. Carlos Silva"}
-      - {label: "Conteúdo", name: "body", widget: "markdown"}
+      - {label: "Descrição", name: "description", widget: "text", required: false, hint: "Resumo que aparece na lista de artigos"}
+
+      - label: "Imagem de destaque"
+        name: "image"
+        widget: "image"
+        required: false
+        hint: "Imagem que aparece no card do artigo"
+        media_library:
+          config:
+            multiple: false
+            max_file_size: 5242880
+
+      - label: "Vídeo de destaque"
+        name: "featured_video"
+        widget: "object"
+        required: false
+        hint: "Adicione um vídeo MP4 ou link do YouTube"
+        fields:
+          - {label: "Tipo de vídeo", name: "type", widget: "select", options: ["upload", "youtube"], default: "upload"}
+          - label: "Arquivo de vídeo"
+            name: "file"
+            widget: "file"
+            required: false
+            media_library:
+              config:
+                multiple: false
+                max_file_size: 52428800
+          - {label: "URL do YouTube", name: "url", widget: "string", required: false}
+          - {label: "Legenda", name: "caption", widget: "string", required: false}
+
+      - {label: "Autor", name: "author", widget: "string", default: "Edson Silva Maltez"}
+
+      - label: "Conteúdo"
+        name: "body"
+        widget: "markdown"
+        modes: ["raw", "rich_text"]
+        buttons: ["bold", "italic", "link", "heading-one", "heading-two", "heading-three", "quote", "code", "bulleted-list", "numbered-list"]
+        editor_components: ["image", "code-block"]
+        hint: "Use o modo texto se o editor visual acusar conteúdo obrigatório."
