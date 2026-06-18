@@ -53,7 +53,7 @@ export default function Blog() {
                 content: content.substring(0, 200) + '...'
               });
             }
-          } catch (error) {
+          } catch {
             console.log(`Erro ao carregar ${slug}`);
           }
         }
@@ -183,7 +183,7 @@ export default function Blog() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts.map((post, index) => (
+              {filteredPosts.map(post => (
                 <article
                   key={post.slug}
                   className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"

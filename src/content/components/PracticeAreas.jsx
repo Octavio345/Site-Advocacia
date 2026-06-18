@@ -1,8 +1,4 @@
-import { useState } from 'react';
-
 export default function PracticeAreas() {
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-
   const areas = [
     {
       icon: "👨‍👩‍👧‍👦",
@@ -61,8 +57,6 @@ export default function PracticeAreas() {
             <div
               key={index}
               className="group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
             >
               {/* Hover Gradient */}
               <div className={`absolute inset-0 bg-gradient-to-br ${area.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
