@@ -6,6 +6,49 @@
   <title>Gerenciar Site - Edson Maltez</title>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:wght@400;700&display=swap');
+
+    /* Mantem o campo de escrita proximo da leitura final do artigo. */
+    [data-slate-editor="true"] {
+      color: #263244;
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.9;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    [data-slate-editor="true"] p {
+      margin: 0 0 1.2rem;
+      text-align: justify;
+      text-justify: inter-word;
+      hyphens: auto;
+    }
+
+    [data-slate-editor="true"] h1,
+    [data-slate-editor="true"] h2,
+    [data-slate-editor="true"] h3,
+    [data-slate-editor="true"] h4 {
+      color: #0a2472;
+      font-family: 'Inter', Arial, sans-serif;
+      font-weight: 700;
+      line-height: 1.3;
+      text-align: left;
+    }
+
+    [data-slate-editor="true"] blockquote {
+      border-left: 4px solid #ffd700;
+      padding-left: 1rem;
+      color: #475569;
+      font-style: italic;
+    }
+
+    [data-slate-editor="true"] ul,
+    [data-slate-editor="true"] ol {
+      padding-left: 1.5rem;
+    }
+  </style>
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@3.10.1/dist/decap-cms.js"></script>
@@ -81,7 +124,7 @@
           videoElement,
           imageElement,
           h('div', {
-            style: { fontSize: '16px', lineHeight: '1.8', color: '#333' },
+            className: 'article-preview-content',
             dangerouslySetInnerHTML: { __html: contentHtml },
           }),
           h('div', { style: { marginTop: '50px', paddingTop: '20px', borderTop: '2px solid #c9a227', textAlign: 'center', fontSize: '14px', color: '#666' } },
@@ -92,6 +135,78 @@
     });
 
     CMS.registerPreviewTemplate('posts', PostPreview);
+    CMS.registerPreviewStyle(`
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:wght@400;700&display=swap');
+
+      .article-preview-content {
+        color: #263244;
+        font-family: 'Merriweather', Georgia, serif;
+        font-size: 17px;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+        word-break: normal;
+      }
+
+      .article-preview-content p {
+        margin: 0 0 1.35rem;
+        text-align: justify;
+        text-justify: inter-word;
+        hyphens: auto;
+      }
+
+      .article-preview-content h1,
+      .article-preview-content h2,
+      .article-preview-content h3,
+      .article-preview-content h4 {
+        color: #0a2472;
+        font-family: 'Inter', Arial, sans-serif;
+        font-weight: 700;
+        line-height: 1.3;
+        text-align: left;
+      }
+
+      .article-preview-content h2 {
+        font-size: 28px;
+        margin: 2.5rem 0 1rem;
+      }
+
+      .article-preview-content h3 {
+        font-size: 22px;
+        margin: 2rem 0 0.8rem;
+      }
+
+      .article-preview-content ul,
+      .article-preview-content ol {
+        margin: 0 0 1.5rem 1.5rem;
+      }
+
+      .article-preview-content li {
+        margin-bottom: 0.55rem;
+      }
+
+      .article-preview-content blockquote {
+        margin: 2rem 0;
+        border-left: 4px solid #ffd700;
+        padding: 0.75rem 1.25rem;
+        background: #f8fafc;
+        color: #475569;
+        font-style: italic;
+      }
+
+      .article-preview-content blockquote p {
+        margin-bottom: 0;
+      }
+
+      .article-preview-content strong {
+        color: #142a61;
+      }
+
+      .article-preview-content a {
+        color: #9a7200;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+    `, { raw: true });
   </script>
 </body>
 </html>

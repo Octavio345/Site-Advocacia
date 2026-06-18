@@ -199,7 +199,7 @@ export default function Post() {
 
             {/* CONTEÚDO PRINCIPAL - Convertido de Markdown para HTML */}
             <article 
-              className="prose prose-lg max-w-none prose-headings:text-primary prose-a:text-accent hover:prose-a:text-primary prose-strong:text-primary"
+              className="article-content prose prose-lg max-w-none"
               dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
             />
 
